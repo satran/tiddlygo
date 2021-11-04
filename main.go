@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"crypto/subtle"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -30,6 +31,12 @@ func handler(fileHandler http.Handler) http.HandlerFunc {
 		case http.MethodGet:
 			fileHandler.ServeHTTP(w, r)
 		case http.MethodPut:
+			if r.Header.Get("Content-Type") == "multipart/form-data" {
+				if err := saveAttachment(r); err != nil {
+					http.Error(w, err.Error(), http.StatusConflict)
+				}
+				return
+			}
 			file := strings.Trim(r.URL.Path, "/")
 			if file == "" {
 				file = "index.html"
@@ -49,6 +56,28 @@ func handler(fileHandler http.Handler) http.HandlerFunc {
 		}
 		log.Println(r.Method, r.URL)
 	}
+}
+
+func saveAttachment(r *http.Request) error {
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		log.Println(err)
+		return err
+	}
+	file, meta, err := r.FormFile("file")
+	if err != nil {
+		log.Printf("Error Retrieving the File from form: %s", err)
+		return err
+	}
+	defer file.Close()
+	f, err := os.OpenFile(meta.Filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("error creating object file: %w", err)
+	}
+	defer f.Close()
+	if _, err := io.Copy(f, file); err != nil {
+		return fmt.Errorf("error writing object: %w", err)
+	}
+	return nil
 }
 
 func basicAuth(next http.HandlerFunc, username string, password string) http.HandlerFunc {
