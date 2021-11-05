@@ -1,0 +1,5 @@
+title: $:/plugins/satran/http-attachments/settings
+
+When used on platforms that provide the necessary support (such as [[tiddlygo|https://github.com/satran/tiddlygo]]), you can optionally import binary files as external tiddlers that reference the original file via the ''_canonical_uri'' field. The original file is POST'ed to the server and the ''_canonical_uri'' refers to the path exposed by the server.
+
+<$checkbox tiddler="$:/config/HTTPAttachments/Enable" field="text" checked="yes" unchecked="no" default="no"> <$link to="$:/config/ExternalAttachments/Enable">Enable importing binary files as external attachments</$link> </$checkbox>

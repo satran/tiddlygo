@@ -1,0 +1,6 @@
+{
+	"title": "$:/plugins/satran/http-attachments",
+	"name": "HTTP Attachments",
+	"description": "External attachments using HTTP",
+	"list": "readme settings"
+}
